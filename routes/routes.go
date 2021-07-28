@@ -31,6 +31,7 @@ type DroneStruct struct {
 }
 
 type DroneDB struct {
+	username string
 	password string
 }
 
@@ -47,7 +48,8 @@ func NewRouter() *mux.Router {
 		log.Fatal("error loading environment variables")
 	}
 	mongoPass := os.Getenv("MONGOPASS")
-	db := &DroneDB{password: mongoPass}
+	mongoUser := os.Getenv("MONGOUSER")
+	db := &DroneDB{username: mongoUser, password: mongoPass}
 	// client, ctx = models.GetClient()
 	r := mux.NewRouter()
 	// r.HandleFunc("/", middleware.AuthRequired(indexHandler)).Methods("GET")
@@ -68,7 +70,7 @@ func (db *DroneDB) droneHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	clientOptions := options.Client().
-		ApplyURI("mongodb+srv://thunderpurtz:" + db.password + "@cluster0.14i4y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+		ApplyURI("mongodb+srv://" + db.username + ":" + db.password + "@cluster0.14i4y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, clientOptions)
@@ -172,7 +174,7 @@ func (d *DroneDB) registerHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("register handler called")
 
 	clientOptions := options.Client().
-		ApplyURI("mongodb+srv://thunderpurtz:" + d.password + "@cluster0.14i4y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+		ApplyURI("mongodb+srv://" + d.username + ":" + d.password + "@cluster0.14i4y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, clientOptions)
